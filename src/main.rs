@@ -130,7 +130,6 @@ fn main() -> Result<()> {
         if frame1.size()?.width > 0 && frame2.size()?.width > 0 {
             let mut img1_rectified = Mat::default();
             let mut img2_rectified = Mat::default();
-            //println!("test");
             //Here, remap has some trouble, after remap , It is really black . I don't known why.
             //It is hardly to belive.
             opencv::imgproc::remap(
@@ -192,13 +191,8 @@ fn main() -> Result<()> {
                 core::CV_8U,
                 &mask,
             )?;
-            //let mut output = core::Vector::<Mat>::new();
             let mut output = Mat::default();
-            //let mut output2 = Mat::default();
             calib3d::reproject_image_to_3d(&disp, &mut output, &q, true, 3)?;
-            //output.convert_to(&mut output2, core::CV_16SC1, 0.0, 0.0)?;
-            //let a = output.at_2d(3, 3)? as &(i32,i32,i32);
-            //println!("{:?}",a);
             let show: Vec<Vec<core::Vec3s>> = output.to_vec_2d()?;
             highgui::set_mouse_callback(
                 window,
