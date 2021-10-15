@@ -32,26 +32,24 @@ use opencv::{calib3d, core, highgui, prelude::*, videoio, Result};
 fn main() -> Result<()> {
     let camera_matrix =
         Mat::from_slice_2d(&[[824.0, 0.0, 251.0], [0.0, 825.9, 286.5], [0.0, 0.0, 1.0]])?;
-    //println!("{:?}",camera_matrix.to_vec_2d()? as Vec<Vec<f64>>);
     let dist_coeffs = Mat::from_slice_2d(&[[0.23233, -0.99375, 0.00160, 0.00145, 0.00000]])?;
-    //println!("{:?}",dist_coeffs.to_vec_2d()? as Vec<Vec<f64>>);
     let camera_matrix2 =
         Mat::from_slice_2d(&[[853.0, 0.0, 217.0], [0.0, 852.9, 269.5], [0.0, 0.0, 1.0]])?;
-    //println!("{:?}",camera_matrix2.to_vec_2d()? as Vec<Vec<f64>>);
     let dist_coeffs2 = Mat::from_slice_2d(&[[0.30829, -1.61541, 0.01495, -0.00758, 0.00000]])?;
-    //println!("{:?}",dist_coeffs2.to_vec_2d()? as Vec<Vec<f64>>);
+    // no problem
     let om = Mat::from_slice(&[0.01911, 0.03125, -0.00960])?;
-    //println!("{:?}",om.to_vec_2d()? as Vec<Vec<f64>>);
-    //let om = Mat::from_slice(&)
     let mut r = Mat::default();
     let mut temp = Mat::default();
     calib3d::rodrigues(&om, &mut r, &mut temp)?;
-    //println!("{:?}",r.to_vec_2d()? as Vec<Vec<f64>>);
-    //println!("{:?}",temp.to_vec_2d()? as Vec<Vec<f64>>);
-    let t = Mat::from_slice(&[-70.59612, -2.60704, 18.87635])?;
+    // error
+    let t = Mat::from_slice_2d(&[
+        [-70.59612],
+        [-2.60704],
+        [18.87635]
+    ])?;
     let size = core::Size2i {
-        width: 640,
-        height: 480,
+        width: 400,
+        height: 200,
     };
     let mut r1 = Mat::default();
     let mut r2 = Mat::default();
@@ -92,7 +90,6 @@ fn main() -> Result<()> {
         &mut left_map1,
         &mut left_map2,
     )?;
-    println!("sss");
     let mut right_map1 = Mat::default();
     let mut right_map2 = Mat::default();
     opencv::calib3d::init_undistort_rectify_map(
@@ -122,7 +119,7 @@ fn main() -> Result<()> {
         "blockSize",
         window,
         Some(&mut blocksize),
-        255,
+        20,
         Some(Box::new(|_| {})),
     )?;
     loop {
@@ -190,7 +187,7 @@ fn main() -> Result<()> {
                 &disparity,
                 &mut disp,
                 0.0,
-                5.0,
+                255.0,
                 core::NORM_MINMAX,
                 core::CV_8U,
                 &mask,
@@ -198,7 +195,7 @@ fn main() -> Result<()> {
             //let mut output = core::Vector::<Mat>::new();
             let mut output = Mat::default();
             //let mut output2 = Mat::default();
-            calib3d::reproject_image_to_3d(&disp, &mut output, &q, false, 3)?;
+            calib3d::reproject_image_to_3d(&disp, &mut output, &q, true, 3)?;
             //output.convert_to(&mut output2, core::CV_16SC1, 0.0, 0.0)?;
             //let a = output.at_2d(3, 3)? as &(i32,i32,i32);
             //println!("{:?}",a);
@@ -208,7 +205,7 @@ fn main() -> Result<()> {
                 Some(Box::new(move |x, y, z, _| {
                     if x == 1 {
                         println!("{},{}", y, z);
-                        println!("{:?}", show[x as usize][y as usize]);
+                        println!("{:?}", show[z as usize][y as usize]);
                     }
                 })),
             )?;
